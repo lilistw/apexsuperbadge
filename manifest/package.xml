@@ -25,6 +25,27 @@
         <name>AuraDefinitionBundle</name>
     </types>
     <types>
+        <members>How_We_Roll_Maintenance</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>CustomLabels</name>
+    </types>
+    <types>
+        <members>Case</members>
+        <members>Equipment_Maintenance_Item__c</members>
+        <members>Product2</members>
+        <members>Vehicle__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <!-- Standard object tabs -->
+        <members>Equipment_Maintenance_Item__c</members>
+        <members>Vehicle__c</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
         <members>*</members>
         <name>LightningComponentBundle</name>
     </types>
