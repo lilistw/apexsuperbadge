@@ -5,12 +5,13 @@
         <members>WarehouseCalloutServiceTest</members>
         <members>WarehouseSyncScheduleTest</members>
         <members>CreateDefaultData</members>
+        <members>CreateDefaultDataTest</members>
         <members>WarehouseCalloutService</members>
         <members>WarehouseCalloutServiceMock</members>
-        <members>CreateDefaultDataTest</members>
         <members>MaintenanceRequestHelper</members>
         <members>MaintenanceRequestHelperTest</members>
         <members>MaintenanceRequestTriggerTest</members> 
+        <members>TestFactory</members>
         <name>ApexClass</name>
     </types>
     <types>

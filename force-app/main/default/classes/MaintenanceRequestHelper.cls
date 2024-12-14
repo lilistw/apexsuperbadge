@@ -2,43 +2,20 @@ public with sharing class MaintenanceRequestHelper {
     
     /**
      * Updates Work Orders based on the status of given Cases.
-     * If a Case is newly closed and is of type Repair or Routine Maintenance, 
-     * we create follow-up Routine Maintenance Requests.
-     *
-     * @param newRequests   The list of Cases after an update operation.
-     * @param oldMapRequests A map of Cases before the update operation, keyed by Id.
      */
-    public static void updateWorkOrders(List<Case> newRequests, Map<Id, Case> oldMapRequests) {
-        // List to track cases that have just been closed and meet our criteria
-        List<Case> newlyClosedRequests = new List<Case>();
+    public static void updateWorkOrders(List<Case> newlyClosedRequests) {
+        // Query each closed Case, including related Equipment Maintenance Items ordered by Maintenance Cycle
+        Map<Id, Case> closedRequestsWithItems = new Map<Id, Case>(
+            [SELECT Id, Vehicle__c,
+                (SELECT Id, Equipment__r.Maintenance_Cycle__c, Maintenance_Request__c, Equipment__c, Quantity__c
+                    FROM Equipment_Maintenance_Items__r
+                    ORDER BY Equipment__r.Maintenance_Cycle__c ASC)
+                FROM Case
+                WHERE Id IN :newlyClosedRequests]
+        );
         
-        // Identify Cases that are now closed and were previously not closed, 
-        // and have Type as either 'Repair' or 'Routine Maintenance'.
-        for (Case currentRequest : newRequests) {
-            Case oldRequest = oldMapRequests.get(currentRequest.Id);
-            Boolean justClosed = currentRequest.Status == 'Closed' && oldRequest.Status != 'Closed';
-            Boolean eligibleType = (currentRequest.Type == 'Repair' || currentRequest.Type == 'Routine Maintenance');
-            
-            if (justClosed && eligibleType) {
-                newlyClosedRequests.add(currentRequest);
-            }
-        }
-        
-        // If we have any newly closed requests that qualify, retrieve them with their related items
-        if (!newlyClosedRequests.isEmpty()) {
-            // Query each closed Case, including related Equipment Maintenance Items ordered by Maintenance Cycle
-            Map<Id, Case> closedRequestsWithItems = new Map<Id, Case>(
-                [SELECT Id, Vehicle__c,
-                    (SELECT Id, Equipment__r.Maintenance_Cycle__c, Maintenance_Request__c, Equipment__c, Quantity__c
-                     FROM Equipment_Maintenance_Items__r
-                     ORDER BY Equipment__r.Maintenance_Cycle__c ASC)
-                 FROM Case
-                 WHERE Id IN :newlyClosedRequests]
-            );
-            
-            // Insert follow-up Routine Maintenance Requests based on these closed Cases
-            insertRoutineMaintenanceRequests(closedRequestsWithItems);
-        }
+        // Insert follow-up Routine Maintenance Requests based on these closed Cases
+        insertRoutineMaintenanceRequests(closedRequestsWithItems);
     }
     
     /**
@@ -86,12 +63,9 @@ public with sharing class MaintenanceRequestHelper {
         
         // Attempt to set the Date_Due__c based on the first item’s maintenance cycle.
         // If there's no item or an error occurs, we just skip setting Date_Due__c.
-        try {
-            Integer minMaintCycle = (Integer)closedRequest.Equipment_Maintenance_Items__r[0].Equipment__r.Maintenance_Cycle__c;
-            newMaintRequest.Date_Due__c = Date.today().addDays(minMaintCycle);
-        } catch (Exception e) {
-            System.debug('Cannot add Date Due: ' + e.getMessage());
-        }
+        Integer minMaintCycle = (Integer)closedRequest.Equipment_Maintenance_Items__r[0].Equipment__r.Maintenance_Cycle__c;
+        newMaintRequest.Date_Due__c = Date.today().addDays(minMaintCycle);
+        
         return newMaintRequest;
     }
 }
