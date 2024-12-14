@@ -5,6 +5,7 @@
         <members>WarehouseCalloutServiceTest</members>
         <members>WarehouseSyncScheduleTest</members>
         <members>CreateDefaultData</members>
+        <members>WarehouseCalloutService</members>
         <members>WarehouseCalloutServiceMock</members>
         <members>CreateDefaultDataTest</members>
         <members>MaintenanceRequestHelper</members>
